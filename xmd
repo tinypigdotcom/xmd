@@ -1,5 +1,4 @@
 #!/cygdrive/c/Strawberry/perl/bin/perl
-#!/usr/bin/perl
 
 use strict;
 use warnings FATAL => 'all';
@@ -13,16 +12,7 @@ my $source_string;
 my $dest_string;
 my $stderr_string;
 my $errorfile_string;
-my $argv = "-npro";   # Ignore any .perltidyrc at this site
-$argv .= " -pbp";     # Format according to perl best practices
-$argv .= " -nst";     # Must turn off -st in case -pbp is specified
-$argv .= " -se";      # -se appends the errorfile to stderr
-$argv .= " -html";    # -se appends the errorfile to stderr
-$argv .= " -ntoc";    # -se appends the errorfile to stderr
-$argv .= " -pre";     # <pre> section only
-$argv .= " -nnn";     # line numbers
-## $argv .= " --spell-check";  # uncomment to trigger an error
-
+my $argv = "-npro -pbp -nst -se -html -ntoc -pre";
 my $error;
 my $output;
 
@@ -35,8 +25,10 @@ sub trim {
     $_[0] =~ s{\s*$}{};
 }
 
-sub function1 {
-    my $ifh = IO::File->new('example.mmd', '<');
+sub xmd {
+    my ($infile) = @_;
+    $infile ||= "example.mmd";
+    my $ifh = IO::File->new($infile, '<');
     die if (!defined $ifh);
 
     my $end=0;
@@ -59,12 +51,10 @@ sub function1 {
                     source      => \$source_string,
                     destination => \$dest_string,
                     stderr      => \$stderr_string,
-                    errorfile   => \$errorfile_string,    # ignored when -se flag is set
-                    ##phasers   => 'stun',                # uncomment to trigger an error
+                    errorfile   => \$errorfile_string,
                 );
 
                 if ($error) {
-
                     # serious error in input parameters, no tidied output
                     output("<<STDERR>>\n$stderr_string\n");
                     die "Exiting because of serious errors\n";
@@ -74,14 +64,14 @@ sub function1 {
                     $namespace ||= 'new';
                     for ($dest_string) {
                         s{( class=")}{$1$namespace-}g;
-                        s{<pre>}{<pre class="$namespace">}g;
+                        s{<pre>}{<pre class="$namespace"><ol>}g;
+                        s{</pre>}{</ol></pre>}g;
                         s{<a [^>]*>[^<]*</a>}{}g;
                         s{^(\s*\d+)}{<span class="num">$1.</span>}gm;
+                        s{^( *<span.*span> *)$}{<li>    $1</li>}gm;
                     }
                     output($dest_string);
                 }
-#                if ($stderr_string)    { output "<<STDERR>>\n$stderr_string\n" }
-#                if ($errorfile_string) { output "<<.ERR file>>\n$errorfile_string\n" }
                 $source_string='';
             }
 
@@ -100,7 +90,6 @@ sub function1 {
     }
     $ifh->close;
     my $html = markdown($output);
-#    $html =~ s{>\n\n}{>\n}g;
 
     $ifh = IO::File->new('full_template', '<');
     die if (!defined $ifh);
@@ -111,66 +100,11 @@ sub function1 {
 
 sub main {
     my @argv = @_;
-    function1();
+    xmd(@argv);
     return;
 }
 
 my $rc = ( main(@ARGV) || 0 );
 
 exit $rc;
-
-sub directory_read {
-    # example
-    # my @dot_files = grep { /^\./ && -f "$some_dir/$_" } get_directory($target);
-    sub get_directory {
-        my ($dir) = @_;
-        opendir(my $dh, $dir) || die "can't opendir $dir: $!";
-        my @files = readdir($dh);
-        closedir $dh;
-        return @files;
-    }
-
-    my $target = $ENV{HOME};
-    my @bins = grep { /^bin\d?/ && -d "$target/$_" } get_directory($target);
-}
-
-
-sub file_slurp {
-    my $fh;
-    my $contents = do { local $/; <$fh> }
-}
-
-
-sub infile {
-    use IO::File;
-
-    my $ifh = IO::File->new($0, '<');
-    die if (!defined $ifh);
-
-    while(<$ifh>) {
-        chomp;
-        print "l: $_\n";
-    }
-    $ifh->close;
-}
-
-
-sub outfile {
-    use IO::File;
-    my $ofh = IO::File->new('a.out', '>');
-    die if (!defined $ofh);
-
-    print $ofh "bar\n";
-    $ofh->close;
-}
-
-
-sub timestamp {
-    my ($sec,$min,$hour,$mday,$mon,$year) = localtime(time);
-
-    $mon++;
-    $year += 1900;
-
-    return sprintf("%04s%02s%02s%02s%02s%02s",$year,$mon,$mday,$hour,$min,$sec);
-}
 

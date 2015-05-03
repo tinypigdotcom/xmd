@@ -55,9 +55,18 @@ pre.new {
       border: 2px solid #a1a1a1;
     }
 
+pre.new ol {
+    background: transparent;
+    /* background-color: #ffffff; */
+}
+
+pre.new ol li {
+    background: transparent;
+}
+
 pre.old {
       background: #fefefe;
-      border: double #999999;
+      border: 1px solid #999999;
     }
 
 pre.test {
