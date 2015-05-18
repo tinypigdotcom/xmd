@@ -1,5 +1,5 @@
 #!/cygdrive/c/Strawberry/perl/bin/perl
-#VERSION 0.0.3
+#VERSION 0.0.4
 
 use strict;
 use warnings FATAL => 'all';
@@ -69,7 +69,7 @@ sub xmd {
                         s{</pre>}{</ol></pre>}g;
                         s{<a [^>]*>[^<]*</a>}{}g;
                         s{^(\s*\d+)}{<span class="num">$1.</span>}gm;
-                        s{^(.*span.*)$}{<li>    $1</li>}gm;
+                        s{^(.*span.*)$}{<li> $1</li>}gm;
                         s{^( *)$}{<li></li>}gm;
                     }
                     output($dest_string);
