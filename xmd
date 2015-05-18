@@ -1,5 +1,5 @@
 #!/cygdrive/c/Strawberry/perl/bin/perl
-#VERSION 0.0.4
+#VERSION 0.0.5
 
 use strict;
 use warnings FATAL => 'all';
@@ -36,6 +36,7 @@ sub xmd {
     my $namespace='';
     my $perl_on=0;
     my $control=0;
+    my $previous_line = '';
     while(my $line = <$ifh>) {
         chomp $line;
         $end=0;
@@ -87,7 +88,11 @@ sub xmd {
             $source_string .= "${line}\n";
         }
         else {
+            if ( !$line and $previous_line =~ m{^    } ) {
+                $line = '    code_block_newline_xqz';
+            }
             output("$line\n");
+            $previous_line = $line;
         }
     }
     $ifh->close;
@@ -98,7 +103,11 @@ sub xmd {
     my $contents = do { local $/; <$ifh> };
     my $full = "$contents$html";
 
-    $full =~ s/^\s*\n+//mg;
+    for ( $full ) {
+        s{^\s*\n+}{}mg;
+        s{code_block_newline_xqz}{}g;
+        s{\n</code></pre>}{</code></pre>}mg;
+    }
 
     print $full;
 }
