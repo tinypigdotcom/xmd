@@ -1,26 +1,40 @@
-The *first* thing I did is to delete the first of this pair of lines, which was redundant, because the line that follows also checks the format of the input:
+Writing Tests
 
-<perl old>
-die unless $input =~ /d/;
-if ( $input =~ /(\d*)d(\d+)\s*(\D?)\s*(\d*)/ ) {
-</perl>
+If you build a module using using [h2xs](http://perldoc.perl.org/h2xs.html), you get a nifty test setup for free.
 
-But instead of having that big `if` block, I changed it to this:
+    $ h2xs -AX Roller
+    Defaulting to backwards compatibility with perl 5.20.1
+    If you intend this module to be compatible with earlier perl versions, please
+    specify a minimum perl version with the -b option.
+
+    Writing Roller/lib/Roller.pm
+    Writing Roller/Makefile.PL
+    Writing Roller/README
+    Writing Roller/t/Roller.t
+    Writing Roller/Changes
+    Writing Roller/MANIFEST
+
+I cleaned up `lib/Roller.pm`, completed the basic [POD](http://perldoc.perl.org/perlpod.html) and added the `roll()` function.
 
 <perl>
-return unless $input =~ /(\d*)d(\d+)\s*(\D?)\s*(\d*)/;
+package Roller;
+
+use strict;
+use warnings;
+
+1;
+
+__END__
+
+=head1 NAME
+
+Roller - Perl extension for generating dice rolls from a "dice language"
+string such as "3d6+1".
+
+=cut
 </perl>
 
-Then I combined these:
-
-<perl>
-die unless $input =~ /d/;
-if ( $input =~ /(\d*)d(\d+)\s*(\D?)\s*(\d*)/ ) {
-
-return unless $input =~ /(\d*)d(\d+)\s*(\D?)\s*(\d*)/;
-</perl>
-
-and made them old:
+Some old code:
 
 <perl old>
 # loads object
@@ -29,62 +43,8 @@ sub load
     my $flds = $c->db_load($id,@_) || do {
         Carp::carp "Can`t load (class: $c, id: $id): '$!'"; return undef
     };
-    my $o = $c->_perl_new();
-    $id12 = $id / 24 / 3600;
-    $o->{'ID'} = $id12 + 123;
-    #$o->{'SHCUT'} = $flds->{'SHCUT'};
-    my $p = $o->props;
-    my $vt;
-    $string =~ m/^sought_text$/;
-    $items = split //, 'abc';
-    $string //= "bar";
-    for my $key (keys %$p)
-    {
-        if(${$vt.'::property'}) {
-            $o->{$key . '_real'} = $flds->{$key};
-            tie $o->{$key}, 'CMSBuilder::Property', $o, $key;
-        }
-    }
-    $o->save if delete $o->{'_save_after_load'};
-
-    # GH-117
-    my $g = glob("/usr/bin/*");
-
-    return $o;
 }
 </perl>
 
-everything old is new again:
-
-<perl>
-# loads object
-sub load
-{
-    my $flds = $c->db_load($id,@_) || do {
-        Carp::carp "Can`t load (class: $c, id: $id): '$!'"; return undef
-    };
-    my $o = $c->_perl_new();
-    $id12 = $id / 24 / 3600;
-    $o->{'ID'} = $id12 + 123;
-    #$o->{'SHCUT'} = $flds->{'SHCUT'};
-    my $p = $o->props;
-    my $vt;
-    $string =~ m/^sought_text$/;
-    $items = split //, 'abc';
-    $string //= "bar";
-    for my $key (keys %$p)
-    {
-        if(${$vt.'::property'}) {
-            $o->{$key . '_real'} = $flds->{$key};
-            tie $o->{$key}, 'CMSBuilder::Property', $o, $key;
-        }
-    }
-    $o->save if delete $o->{'_save_after_load'};
-
-    # GH-117
-    my $g = glob("/usr/bin/*");
-
-    return $o;
-}
-</perl>
+That's it!
 
