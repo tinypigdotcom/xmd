@@ -9,6 +9,9 @@ use IO::File;
 use Perl::Tidy;
 use Text::MultiMarkdown 'markdown';
 
+use lib "$ENV{HOME}/lib";
+use DMB::Tools ':all';
+
 my $source_string;
 my $dest_string;
 my $stderr_string;
@@ -30,7 +33,7 @@ sub xmd {
     my ($infile) = @_;
     $infile ||= "example.mmd";
     my $ifh = IO::File->new($infile, '<');
-    die if (!defined $ifh);
+    die "Can't open $infile: $!" if (!defined $ifh);
 
     my $end=0;
     my $namespace='';
@@ -98,8 +101,9 @@ sub xmd {
     $ifh->close;
     my $html = markdown($output);
 
-    $ifh = IO::File->new('full_template', '<');
-    die if (!defined $ifh);
+    my $template_file = 'full_template';
+    $ifh = IO::File->new($template_file, '<');
+    die "Can't open $template_file: $!" if (!defined $ifh);
     my $contents = do { local $/; <$ifh> };
     my $full = "$contents$html";
 
@@ -110,6 +114,7 @@ sub xmd {
     }
 
     print $full;
+    clip($full);
 }
 
 sub main {
