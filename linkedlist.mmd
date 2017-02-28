@@ -1,0 +1,52 @@
+Linked Lists in Perl
+
+The other day I was browsing one of my favorite programming sites, [Rosetta Code](http://rosettacode.org) and I stumbled across the entry for 
+
+If you build a module using using [h2xs](http://perldoc.perl.org/h2xs.html), you get a nifty test setup for free.
+
+    $ h2xs -AX Roller
+    Defaulting to backwards compatibility with perl 5.20.1
+    If you intend this module to be compatible with earlier perl versions, please
+    specify a minimum perl version with the -b option.
+
+    Writing Roller/lib/Roller.pm
+    Writing Roller/Makefile.PL
+    Writing Roller/README
+    Writing Roller/t/Roller.t
+    Writing Roller/Changes
+    Writing Roller/MANIFEST
+
+I cleaned up `lib/Roller.pm`, completed the basic [POD](http://perldoc.perl.org/perlpod.html) and added the `roll()` function.
+
+<perl>
+package Roller;
+
+use strict;
+use warnings;
+
+1;
+
+__END__
+
+=head1 NAME
+
+Roller - Perl extension for generating dice rolls from a "dice language"
+string such as "3d6+1".
+
+=cut
+</perl>
+
+Some old code:
+
+<perl old>
+# loads object
+sub load
+{
+    my $flds = $c->db_load($id,@_) || do {
+        Carp::carp "Can`t load (class: $c, id: $id): '$!'"; return undef
+    };
+}
+</perl>
+
+That's it!
+
